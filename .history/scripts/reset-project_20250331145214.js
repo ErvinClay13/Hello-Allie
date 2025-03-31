@@ -93,6 +93,6 @@ const moveDirectories = async () => {
   }
 };
 
-// Run the script
+// 🚀 Run the script
 moveDirectories();
 

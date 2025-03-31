@@ -7,7 +7,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 // Define props for the ThemedView component, extending standard ViewProps
 // and adding optional custom light and dark theme colors
 export type ThemedViewProps = ViewProps & {
-  lightColor?: string; 
+  lightColor?: string; // Optional override color for light mode
   darkColor?: string; 
 };
 

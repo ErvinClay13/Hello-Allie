@@ -89,10 +89,10 @@ const moveDirectories = async () => {
       "1. Run `npx expo start` to start a development server.\n2. Edit app/index.tsx to edit the main screen.\n3. Delete the /app-example directory when you're done referencing it."
     );
   } catch (error) {
-    console.error(`Error during script execution: ${error}`);
+    console.error(`❌ Error during script execution: ${error}`);
   }
 };
 
-// Run the script
+// 🚀 Run the script
 moveDirectories();
 
