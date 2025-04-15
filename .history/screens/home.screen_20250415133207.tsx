@@ -92,6 +92,7 @@ export default function HomeScreen() {
       const transcript = await sendAudioToWhisper(uri);
       if (transcript) {
         setText(transcript);
+
         const aiResponse = await getSmartAIResponse(transcript);
         setResponse(aiResponse);
         Speech.speak(aiResponse);
@@ -136,6 +137,7 @@ export default function HomeScreen() {
         },
         body: JSON.stringify({ prompt }),
       });
+
       const data = await res.json();
       return data.result || "Sorry, I couldn't get a response.";
     } catch (error) {
@@ -152,6 +154,7 @@ export default function HomeScreen() {
       style={styles.container}
     >
       <StatusBar barStyle="light-content" />
+
       <Image
         source={require("@/assets/main/blur.png")}
         style={{
@@ -240,7 +243,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(10),
   },
 });
-
 
  
 

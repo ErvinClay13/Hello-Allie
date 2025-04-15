@@ -83,11 +83,7 @@ export default function HomeScreen() {
 
       const uri = recording?.getURI();
       console.log("Audio File URI:", uri);
-
-      if (!uri) {
-        console.log("Error: Recording URI is undefined!");
-        return;
-      }
+      if (!uri) return;
 
       const transcript = await sendAudioToWhisper(uri);
       if (transcript) {
@@ -136,6 +132,7 @@ export default function HomeScreen() {
         },
         body: JSON.stringify({ prompt }),
       });
+
       const data = await res.json();
       return data.result || "Sorry, I couldn't get a response.";
     } catch (error) {
@@ -240,8 +237,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(10),
   },
 });
-
-
  
 
 
