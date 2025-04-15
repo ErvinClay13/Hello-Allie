@@ -92,7 +92,6 @@ export default function HomeScreen() {
       const transcript = await sendAudioToWhisper(uri);
       if (transcript) {
         setText(transcript);
-
         const aiResponse = await getSmartAIResponse(transcript);
         setResponse(aiResponse);
         Speech.speak(aiResponse);
@@ -138,7 +137,7 @@ export default function HomeScreen() {
         body: JSON.stringify({ prompt }),
       });
       const data = await res.json();
-      return data.result || "Sorry, something went wrong.";
+      return data.result || "Sorry, I couldn't get a response.";
     } catch (error) {
       console.error("Smart AI Fetch Error:", error);
       return "Sorry, something went wrong.";
@@ -243,7 +242,24 @@ const styles = StyleSheet.create({
 });
 
 
+import axios from 'axios';
 
+const options = {
+  method: 'GET',
+  url: 'https://therundown-therundown-v1.p.rapidapi.com/sports/2/schedule',
+  params: {limit: '100'},
+  headers: {
+    'x-rapidapi-key': 'ad7997b541mshd85f1646999046dp1080b2jsnfccd42fa5730',
+    'x-rapidapi-host': 'therundown-therundown-v1.p.rapidapi.com'
+  }
+};
+
+try {
+	const response = await axios.request(options);
+	console.log(response.data);
+} catch (error) {
+	console.error(error);
+}
  
 
 
