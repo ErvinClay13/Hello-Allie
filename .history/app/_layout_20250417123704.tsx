@@ -4,7 +4,11 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
+
+// Hook to load custom fonts
 import { useFonts } from "expo-font";
+
+// Stack navigator from Expo Router
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";

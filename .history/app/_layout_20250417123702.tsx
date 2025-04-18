@@ -4,8 +4,14 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
+
+// Hook to load custom fonts
 import { useFonts } from "expo-font";
+
+// Stack navigator from Expo Router
 import { Stack } from "expo-router";
+
+// Splash screen utility from Expo to control when it shows/hides
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
