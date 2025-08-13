@@ -1,3 +1,5 @@
+// ✅ FINAL FULL VERSION: Home.screen.tsx — Multilingual, NBA, Weather, Jokes, Scheduling, Voice, Transcription
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -102,7 +104,7 @@ export default function HomeScreen() {
       });
       const data = await res.json();
       setResponse(data.result);
-      speak(data.result, selectedLanguage);
+      speak(data.result);
     } catch (err) {
       console.error("AI fetch error", err);
       Alert.alert("Error", "Something went wrong with AI response.");
@@ -111,11 +113,10 @@ export default function HomeScreen() {
     }
   };
 
-  const speak = (text: string, lang: string) => {
+  const speak = (text: string) => {
     Speech.stop();
-    const voiceLang = lang === "es" ? "es-MX" : "en-US";
     Speech.speak(text, {
-      language: voiceLang,
+      language: selectedLanguage === "es" ? "es-MX" : "en-US",
       onDone: () => setIsLoading(false),
     });
   };
