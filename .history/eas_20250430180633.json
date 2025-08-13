@@ -1,0 +1,33 @@
+// {
+//   "cli": {
+//     "version": ">= 3.13.0",
+//     "appVersionSource": "remote"
+//   },
+//   "build": {
+//     "development": {
+//       "developmentClient": true,
+//       "distribution": "internal",
+//       "channel": "development",
+//       "env": {
+//         "KOTLIN_VERSION": "1.9.25"
+//       }
+//     },
+//     "preview": {
+//       "distribution": "internal",
+//       "channel": "preview",
+//       "env": {
+//         "KOTLIN_VERSION": "1.9.25"
+//       }
+//     },
+//     "production": {
+//       "autoIncrement": true,
+//       "channel": "production",
+//       "env": {
+//         "KOTLIN_VERSION": "1.9.25"
+//       }
+//     }
+//   },
+//   "submit": {
+//     "production": {}
+//   }
+// }

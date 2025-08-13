@@ -24,7 +24,7 @@ export default {
       kotlinVersion: "1.9.25", // Keep this for clarity
       adaptiveIcon: {
         foregroundImage: "./assets/images/AllieImg3.png",
-        backgroundColor: "#4c6fd7",
+        backgroundColor: "#ffffff",
       },
       permissions: [
         "android.permission.RECORD_AUDIO",

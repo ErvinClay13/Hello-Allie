@@ -6,7 +6,7 @@ export default {
     slug: "Hello-Allie",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/AllieImg3.png",
+    icon: "./assets/images/AllieImg2.png",
     scheme: "myapp",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
@@ -23,8 +23,8 @@ export default {
       package: "com.ervinclay13.HelloAllie",
       kotlinVersion: "1.9.25", // Keep this for clarity
       adaptiveIcon: {
-        foregroundImage: "./assets/images/AllieImg3.png",
-        backgroundColor: "#4c6fd7",
+        foregroundImage: "./assets/images/adaptive-icon.png",
+        backgroundColor: "#ffffff",
       },
       permissions: [
         "android.permission.RECORD_AUDIO",

@@ -18,18 +18,7 @@ import * as Speech from "expo-speech";
 import { useFocusEffect } from "@react-navigation/native";
 import { MotiView } from "moti";
 
-// Type Definitions
-
-type Language = "en" | "es";
-type Message = { role: string; content: string; timestamp: number };
-
-const translations: Record<Language, {
-  mic: string;
-  cancel: string;
-  you: string;
-  allie: string;
-  personalities: Record<string, string>;
-}> = {
+const translations = {
   en: {
     mic: "Tap to speak",
     cancel: "Cancel",
@@ -51,27 +40,26 @@ const translations: Record<Language, {
       friendly: "¡Hola! ¡Vamos a tener una gran conversación!",
       sassy: "Ay cariño, prepárate. Elegiste la mejor versión de mí.",
       motivational: "Pongámonos a trabajar. Tienes grandeza por desbloquear.",
-      humorous: "¿Por qué cruzó la IA la calle? Para responder tus preguntas, ¡obvio!",
+      humorous: "¿Por qué cruzó la IA la calle? Para responder tus preguntas, obvio!",
     },
   },
 };
 
 export default function HomeScreen() {
-  const [language, setLanguage] = useState<Language>("en");
-  const locale = translations[language];
+  const [language, setLanguage] = useState("en");
   const [text, setText] = useState("");
   const [response, setResponse] = useState("");
   const [isRecording, setIsRecording] = useState(false);
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [recording, setRecording] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [conversationHistory, setConversationHistory] = useState<Message[]>([]);
+  const [conversationHistory, setConversationHistory] = useState([]);
   const [selectedPersonality, setSelectedPersonality] = useState("friendly");
   const [modeIntro, setModeIntro] = useState("");
   const [typingIndex, setTypingIndex] = useState(0);
   const isInitialMount = useRef(true);
-  const [pendingDeleteOptions, setPendingDeleteOptions] = useState<any[]>([]);
 
+  const locale = translations[language];
   const modeQuotes = locale.personalities;
 
   useEffect(() => {
@@ -104,179 +92,177 @@ export default function HomeScreen() {
     }, [recording])
   );
 
-  const getMicrophonePermission = async () => {
-    try {
-      const { granted } = await Audio.requestPermissionsAsync();
-      if (!granted) {
-        Alert.alert("Permission", "Please grant permission to access microphone");
-        return false;
-      }
-      return true;
-    } catch (error) {
-      console.log("Microphone Permission Error:", error);
-      return false;
-    }
-  };
-
-  const recordingOptions = {
-    android: {
-      extension: ".m4a",
-      outputFormat: Audio.AndroidOutputFormat.MPEG_4,
-      audioEncoder: Audio.AndroidAudioEncoder.AAC,
-      sampleRate: 44100,
-      numberOfChannels: 1,
-      bitRate: 128000,
-    },
-    ios: {
-      extension: ".m4a",
-      audioQuality: Audio.IOSAudioQuality.HIGH,
-      sampleRate: 44100,
-      numberOfChannels: 1,
-      bitRate: 128000,
-    },
-    web: {} as any,
-  };
-
   const startRecording = async () => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-    const hasPermission = await getMicrophonePermission();
-    if (!hasPermission) return;
+    const { granted } = await Audio.requestPermissionsAsync();
+    if (!granted) return Alert.alert("Permission", "Please grant microphone access");
+
     try {
       await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
       setIsRecording(true);
-      const { recording } = await Audio.Recording.createAsync(recordingOptions);
+      const { recording } = await Audio.Recording.createAsync({
+        android: {
+          extension: ".m4a",
+          outputFormat: Audio.AndroidOutputFormat.MPEG_4,
+          audioEncoder: Audio.AndroidAudioEncoder.AAC,
+          sampleRate: 44100,
+          numberOfChannels: 1,
+          bitRate: 128000,
+        },
+        ios: {
+          extension: ".m4a",
+          audioQuality: Audio.IOSAudioQuality.HIGH,
+          sampleRate: 44100,
+          numberOfChannels: 1,
+          bitRate: 128000,
+        },
+        web: {},
+      });
       setRecording(recording);
-    } catch (error) {
-      console.log("Failed to start recording:", error);
-      Alert.alert("Error", "Failed to start recording");
+    } catch (err) {
+      Alert.alert("Error", "Recording failed");
     }
   };
 
   const stopRecording = async () => {
-    try {
-      if (!recording) return;
-      setIsRecording(false);
-      await recording.stopAndUnloadAsync();
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-      const uri = recording.getURI();
-      if (!uri) return;
-      setIsLoading(true);
-      const transcript = await sendAudioToWhisper(uri);
-      if (transcript) {
-        setText(transcript);
-        if (pendingDeleteOptions.length && /^\d+$/.test(transcript.trim())) {
-          const selectedIndex = parseInt(transcript.trim(), 10) - 1;
-          if (selectedIndex >= 0 && selectedIndex < pendingDeleteOptions.length) {
-            const selectedEvent = pendingDeleteOptions[selectedIndex];
-            if (!selectedEvent.id) return handleAIResponse({ message: "Unable to find the selected event ID. Please try again." });
-            const deletionResponse = await deleteScheduleEvent(selectedEvent.id);
-            setPendingDeleteOptions([]);
-            return handleAIResponse({ message: deletionResponse });
-          } else {
-            return handleAIResponse({ message: "Invalid selection. Please try again." });
-          }
-        }
-        const isScheduleCommand = /remind me|schedule|add to calendar|what's my schedule|show schedule|list schedule|delete|remove/i.test(transcript);
-        const aiResponse = isScheduleCommand ? await sendSchedulePrompt(transcript) : await getSmartAIResponse(transcript);
-        handleAIResponse(aiResponse);
-      } else {
-        setIsLoading(false);
-      }
-    } catch (error) {
-      console.log("Failed to stop recording:", error);
-      Alert.alert("Error", "Failed to stop recording");
+    if (!recording) return;
+    setIsRecording(false);
+    await recording.stopAndUnloadAsync();
+    await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+
+    const uri = recording.getURI();
+    if (!uri) return;
+
+    setIsLoading(true);
+    const transcript = await sendAudioToWhisper(uri);
+    if (transcript) {
+      setText(transcript);
+      const aiResponse = await getSmartAIResponse(transcript);
+      handleAIResponse(aiResponse);
+    } else {
       setIsLoading(false);
     }
   };
 
-  const handleAIResponse = (aiResponse: any) => {
-    const message = aiResponse.message || aiResponse;
-    setResponse(message);
-    if (aiResponse.options) setPendingDeleteOptions(aiResponse.options);
-    else setPendingDeleteOptions([]);
+  const handleAIResponse = (aiResponse) => {
+    setResponse(aiResponse);
     setConversationHistory((prev) => [
       ...prev,
       { role: "user", content: text, timestamp: Date.now() },
-      { role: "assistant", content: message, timestamp: Date.now() },
+      { role: "assistant", content: aiResponse, timestamp: Date.now() },
     ]);
     setIsLoading(false);
     setIsSpeaking(true);
-    Speech.speak(message.replace(/[\u{1F600}-\u{1F64F}]/gu, ""), {
+    Speech.speak(aiResponse, {
       language: language === "es" ? "es-ES" : "en-US",
-      onDone: speechDoneHandler,
+      onDone: () => setIsSpeaking(false),
     });
   };
 
-  const sendAudioToWhisper = async (uri: string) => {
+  const sendAudioToWhisper = async (uri) => {
     const formData = new FormData();
     formData.append("file", {
       uri,
       type: "audio/m4a",
       name: "recording.m4a",
-    } as any);
+    });
     formData.append("language", language);
-    const response = await fetch("https://hello-allie-backend.onrender.com/api/transcribe", {
+
+    const res = await fetch("https://hello-allie-backend.onrender.com/api/transcribe", {
       method: "POST",
       headers: { "Content-Type": "multipart/form-data" },
       body: formData,
     });
-    const data = await response.json();
+    const data = await res.json();
     return data.text;
   };
 
-  const getSmartAIResponse = async (prompt: string) => {
+  const getSmartAIResponse = async (prompt) => {
     const res = await fetch("https://hello-allie-backend.onrender.com/api/smart", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt, conversationHistory, mode: selectedPersonality, language }),
     });
     const data = await res.json();
-    return data.result || "Sorry, something went wrong.";
-  };
-
-  const sendSchedulePrompt = async (prompt: string) => {
-    const isDeleteCommand = /delete|remove/i.test(prompt);
-    const endpoint = isDeleteCommand ? "https://hello-allie-backend.onrender.com/api/schedule/delete" : "https://hello-allie-backend.onrender.com/api/schedule";
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
-    });
-    const data = await res.json();
-    return data;
-  };
-
-  const deleteScheduleEvent = async (eventId: string) => {
-    const res = await fetch("https://hello-allie-backend.onrender.com/api/schedule/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: eventId }),
-    });
-    const data = await res.json();
-    return data.message || "Deleted.";
-  };
-
-  const speechDoneHandler = () => {
-    setIsSpeaking(false);
-    Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true }).catch(console.log);
+    return data.result;
   };
 
   return (
-    <View style={styles.container}>
-      <Text>{locale.mic}</Text>
-      {/* Full UI implementation continues here... */}
-    </View>
+    <LinearGradient colors={["#250152", "#000"]} style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={styles.modeIntro}>{modeIntro.slice(0, typingIndex)}</Text>
+        {text ? <Text style={styles.transcript}>{locale.you}: {text}</Text> : null}
+        {response ? <Text style={styles.response}>{locale.allie}: {response}</Text> : null}
+      </ScrollView>
+
+      <View style={styles.modeButtons}>
+        {(Object.keys(modeQuotes)).map((mode) => (
+          <MotiView key={mode} from={{ scale: 1 }} animate={{ scale: selectedPersonality === mode ? 1.2 : 1 }}>
+            <TouchableOpacity
+              onPress={() => {
+                setSelectedPersonality(mode);
+                setModeIntro(modeQuotes[mode]);
+              }}
+              style={[styles.modeButton, selectedPersonality === mode && styles.activeModeButton]}
+            >
+              <Text style={styles.modeText}>{mode}</Text>
+            </TouchableOpacity>
+          </MotiView>
+        ))}
+      </View>
+
+      <View style={{ flexDirection: "row", justifyContent: "center", marginVertical: 10 }}>
+        <TouchableOpacity onPress={() => setLanguage("en")}><Text style={{ color: language === "en" ? "#7f5af0" : "#fff" }}>English</Text></TouchableOpacity>
+        <Text style={{ marginHorizontal: 10, color: "#fff" }}>|</Text>
+        <TouchableOpacity onPress={() => setLanguage("es")}><Text style={{ color: language === "es" ? "#7f5af0" : "#fff" }}>Español</Text></TouchableOpacity>
+      </View>
+
+      <View style={styles.micContainer}>
+        {!isRecording ? (
+          <TouchableOpacity style={styles.micButton} onPress={startRecording}>
+            <FontAwesome name="microphone" size={scale(50)} color="#2b3356" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={stopRecording}>
+            <LottieView
+              source={require("@/assets/animations/animation.json")}
+              autoPlay
+              loop
+              style={{ width: scale(250), height: scale(250) }}
+            />
+          </TouchableOpacity>
+        )}
+
+        {(isLoading || isSpeaking) && (
+          <TouchableOpacity onPress={() => { Speech.stop(); setIsSpeaking(false); setIsLoading(false); }}>
+            <Text style={{ color: "#ff6464", fontSize: 16 }}>{locale.cancel}</Text>
+          </TouchableOpacity>
+        )}
+
+        {isLoading && <ActivityIndicator size="large" color="#fff" style={{ marginTop: 10 }} />}
+      </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
+  container: { flex: 1, paddingTop: verticalScale(50) },
+  scrollContainer: { paddingHorizontal: scale(20), alignItems: "center" },
+  modeIntro: { color: "#fff", fontSize: scale(16), textAlign: "center", marginBottom: 10 },
+  transcript: { color: "#9ddcff", fontSize: scale(14), fontStyle: "italic", marginBottom: 5 },
+  response: { color: "#fff", fontSize: scale(16), textAlign: "center", paddingHorizontal: scale(10) },
+  modeButtons: { flexDirection: "row", justifyContent: "space-around", marginTop: 10, marginBottom: 10 },
+  modeButton: { backgroundColor: "#333", padding: 10, borderRadius: 20 },
+  activeModeButton: { backgroundColor: "#7f5af0" },
+  modeText: { color: "#fff", textTransform: "capitalize" },
+  micContainer: { alignItems: "center", marginTop: verticalScale(10) },
+  micButton: {
+    width: scale(110),
+    height: scale(110),
     backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: scale(100),
   },
 });
 

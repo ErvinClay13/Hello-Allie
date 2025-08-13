@@ -1,3 +1,5 @@
+// ✅ FINAL FULL VERSION: Home.screen.tsx — Fully merged with language toggle support
+
 import {
   Alert,
   StatusBar,
@@ -18,18 +20,7 @@ import * as Speech from "expo-speech";
 import { useFocusEffect } from "@react-navigation/native";
 import { MotiView } from "moti";
 
-// Type Definitions
-
-type Language = "en" | "es";
-type Message = { role: string; content: string; timestamp: number };
-
-const translations: Record<Language, {
-  mic: string;
-  cancel: string;
-  you: string;
-  allie: string;
-  personalities: Record<string, string>;
-}> = {
+const translations = {
   en: {
     mic: "Tap to speak",
     cancel: "Cancel",
@@ -57,20 +48,20 @@ const translations: Record<Language, {
 };
 
 export default function HomeScreen() {
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState("en");
   const locale = translations[language];
   const [text, setText] = useState("");
   const [response, setResponse] = useState("");
   const [isRecording, setIsRecording] = useState(false);
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [recording, setRecording] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [conversationHistory, setConversationHistory] = useState<Message[]>([]);
+  const [conversationHistory, setConversationHistory] = useState([]);
   const [selectedPersonality, setSelectedPersonality] = useState("friendly");
   const [modeIntro, setModeIntro] = useState("");
   const [typingIndex, setTypingIndex] = useState(0);
   const isInitialMount = useRef(true);
-  const [pendingDeleteOptions, setPendingDeleteOptions] = useState<any[]>([]);
+  const [pendingDeleteOptions, setPendingDeleteOptions] = useState([]);
 
   const modeQuotes = locale.personalities;
 
@@ -192,7 +183,7 @@ export default function HomeScreen() {
     }
   };
 
-  const handleAIResponse = (aiResponse: any) => {
+  const handleAIResponse = (aiResponse) => {
     const message = aiResponse.message || aiResponse;
     setResponse(message);
     if (aiResponse.options) setPendingDeleteOptions(aiResponse.options);
@@ -210,13 +201,13 @@ export default function HomeScreen() {
     });
   };
 
-  const sendAudioToWhisper = async (uri: string) => {
+  const sendAudioToWhisper = async (uri) => {
     const formData = new FormData();
     formData.append("file", {
       uri,
       type: "audio/m4a",
       name: "recording.m4a",
-    } as any);
+    });
     formData.append("language", language);
     const response = await fetch("https://hello-allie-backend.onrender.com/api/transcribe", {
       method: "POST",
@@ -227,7 +218,7 @@ export default function HomeScreen() {
     return data.text;
   };
 
-  const getSmartAIResponse = async (prompt: string) => {
+  const getSmartAIResponse = async (prompt) => {
     const res = await fetch("https://hello-allie-backend.onrender.com/api/smart", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -237,7 +228,7 @@ export default function HomeScreen() {
     return data.result || "Sorry, something went wrong.";
   };
 
-  const sendSchedulePrompt = async (prompt: string) => {
+  const sendSchedulePrompt = async (prompt) => {
     const isDeleteCommand = /delete|remove/i.test(prompt);
     const endpoint = isDeleteCommand ? "https://hello-allie-backend.onrender.com/api/schedule/delete" : "https://hello-allie-backend.onrender.com/api/schedule";
     const res = await fetch(endpoint, {
@@ -249,7 +240,7 @@ export default function HomeScreen() {
     return data;
   };
 
-  const deleteScheduleEvent = async (eventId: string) => {
+  const deleteScheduleEvent = async (eventId) => {
     const res = await fetch("https://hello-allie-backend.onrender.com/api/schedule/delete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -265,18 +256,71 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text>{locale.mic}</Text>
-      {/* Full UI implementation continues here... */}
-    </View>
+    <LinearGradient colors={["#250152", "#000"]} style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {modeIntro && <Text style={styles.modeIntro}>{modeIntro.slice(0, typingIndex)}</Text>}
+        {text ? <Text style={styles.transcript}>{locale.you}: {text}</Text> : null}
+        {response ? <Text style={styles.response}>{locale.allie}: {response}</Text> : null}
+      </ScrollView>
+
+      <View style={styles.modeButtons}>
+        {(Object.keys(modeQuotes)).map((mode) => (
+          <MotiView key={mode} from={{ scale: 1 }} animate={{ scale: selectedPersonality === mode ? 1.2 : 1 }}>
+            <TouchableOpacity onPress={() => { setSelectedPersonality(mode); setModeIntro(modeQuotes[mode]); }} style={[styles.modeButton, selectedPersonality === mode && styles.activeModeButton]}>
+              <Text style={styles.modeText}>{mode}</Text>
+            </TouchableOpacity>
+          </MotiView>
+        ))}
+      </View>
+
+      <View style={{ flexDirection: "row", justifyContent: "center", marginVertical: 10 }}>
+        <TouchableOpacity onPress={() => setLanguage("en")}><Text style={{ color: language === "en" ? "#7f5af0" : "#fff" }}>English</Text></TouchableOpacity>
+        <Text style={{ marginHorizontal: 10, color: "#fff" }}>|</Text>
+        <TouchableOpacity onPress={() => setLanguage("es")}><Text style={{ color: language === "es" ? "#7f5af0" : "#fff" }}>Español</Text></TouchableOpacity>
+      </View>
+
+      <View style={styles.micContainer}>
+        {!isRecording ? (
+          <TouchableOpacity style={styles.micButton} onPress={startRecording}>
+            <FontAwesome name="microphone" size={scale(50)} color="#2b3356" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={stopRecording}>
+            <LottieView source={require("@/assets/animations/animation.json")} autoPlay loop speed={1.3} style={{ width: scale(250), height: scale(250) }} />
+          </TouchableOpacity>
+        )}
+
+        {(isLoading || isSpeaking) && (
+          <TouchableOpacity onPress={() => { Speech.stop(); setIsSpeaking(false); setIsLoading(false); }} style={{ marginTop: 10 }}>
+            <Text style={{ color: "#ff6464", fontSize: 16 }}>{locale.cancel}</Text>
+          </TouchableOpacity>
+        )}
+
+        {isLoading && <ActivityIndicator size="large" color="#fff" style={{ marginTop: 10 }} />}
+      </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
+  container: { flex: 1, paddingTop: verticalScale(50) },
+  scrollContainer: { paddingHorizontal: scale(20), alignItems: "center" },
+  modeIntro: { color: "#fff", fontSize: scale(16), textAlign: "center", marginBottom: 10 },
+  transcript: { color: "#9ddcff", fontSize: scale(14), fontStyle: "italic", marginBottom: 5 },
+  response: { color: "#fff", fontSize: scale(16), textAlign: "center", paddingHorizontal: scale(10) },
+  modeButtons: { flexDirection: "row", justifyContent: "space-around", marginTop: 10, marginBottom: 10 },
+  modeButton: { backgroundColor: "#333", padding: 10, borderRadius: 20 },
+  activeModeButton: { backgroundColor: "#7f5af0" },
+  modeText: { color: "#fff", textTransform: "capitalize" },
+  micContainer: { alignItems: "center", marginTop: verticalScale(10) },
+  micButton: {
+    width: scale(110),
+    height: scale(110),
     backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: scale(100),
   },
 });
 
