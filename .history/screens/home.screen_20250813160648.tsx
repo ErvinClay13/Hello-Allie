@@ -15,17 +15,17 @@ import { Picker } from "@react-native-picker/picker";
 import LottieView from "lottie-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-const API_BASE = "https://hello-allie-backend.onrender.com/api";
+const API_BASE = "https://your-backend-url.com/api"; // Replace with your deployed backend
 
 export default function HomeScreen() {
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [recording, setRecording] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [response, setResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [selectedPersonality, setSelectedPersonality] = useState("friendly");
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const soundRef = useRef(null);
 
   useEffect(() => {
     return () => {
@@ -60,18 +60,14 @@ export default function HomeScreen() {
     setIsRecording(false);
     setIsLoading(true);
     try {
-      if (!recording) return;
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
-      if (!uri) throw new Error("Recording URI not found");
-
       const formData = new FormData();
       formData.append("file", {
         uri,
         type: "audio/m4a",
         name: "recording.m4a",
-      } as any);
-      formData.append("language", selectedLanguage);
+      });
 
       const transcriptionRes = await fetch(`${API_BASE}/transcribe`, {
         method: "POST",
@@ -90,7 +86,7 @@ export default function HomeScreen() {
     }
   };
 
-  const handleAIResponse = async (prompt: string) => {
+  const handleAIResponse = async (prompt) => {
     try {
       const res = await fetch(`${API_BASE}/smart`, {
         method: "POST",
@@ -112,12 +108,9 @@ export default function HomeScreen() {
     }
   };
 
-  const speak = (text: string) => {
+  const speak = (text) => {
     Speech.stop();
-    Speech.speak(text, {
-      language: selectedLanguage === "es" ? "es-MX" : "en-US",
-      onDone: () => setIsLoading(false),
-    });
+    Speech.speak(text, { language: selectedLanguage === "es" ? "es-MX" : "en-US" });
   };
 
   const cancelSpeech = () => {
@@ -131,7 +124,7 @@ export default function HomeScreen() {
         <Picker
           selectedValue={selectedLanguage}
           style={styles.picker}
-          onValueChange={(val: string) => setSelectedLanguage(val)}
+          onValueChange={(val) => setSelectedLanguage(val)}
         >
           <Picker.Item label="English" value="en" />
           <Picker.Item label="Español" value="es" />
@@ -139,7 +132,7 @@ export default function HomeScreen() {
         <Picker
           selectedValue={selectedPersonality}
           style={styles.picker}
-          onValueChange={(val: string) => setSelectedPersonality(val)}
+          onValueChange={(val) => setSelectedPersonality(val)}
         >
           <Picker.Item label="Friendly" value="friendly" />
           <Picker.Item label="Sassy" value="sassy" />
