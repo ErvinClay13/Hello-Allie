@@ -1,6 +1,5 @@
-// ✅ FINAL FULL VERSION: Home.screen.tsx — With full language + voice + personality support (Spanish & English)
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -18,7 +17,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 const API_BASE = "https://hello-allie-backend.onrender.com/api";
 
-const HomeScreen = () => {
+export default function HomeScreen() {
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -48,10 +47,10 @@ const HomeScreen = () => {
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
-      const { recording: newRecording } = await Audio.Recording.createAsync(
+      const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
-      setRecording(newRecording);
+      setRecording(recording);
     } catch (err) {
       console.error("Failed to start recording", err);
     }
@@ -130,12 +129,12 @@ const HomeScreen = () => {
   };
 
   return (
-    <LinearGradient colors={["#1d2671", "#c33764"]} style={styles.container}>
+    <LinearGradient colors={["#a5038aff", "#c33764"]} style={styles.container}>
       <View style={styles.topBar}>
         <Picker
           selectedValue={selectedLanguage}
           style={styles.picker}
-          onValueChange={(val) => setSelectedLanguage(val)}
+          onValueChange={(val: string) => setSelectedLanguage(val)}
         >
           <Picker.Item label="English" value="en" />
           <Picker.Item label="Español" value="es" />
@@ -143,7 +142,7 @@ const HomeScreen = () => {
         <Picker
           selectedValue={selectedPersonality}
           style={styles.picker}
-          onValueChange={(val) => setSelectedPersonality(val)}
+          onValueChange={(val: string) => setSelectedPersonality(val)}
         >
           <Picker.Item label="Friendly" value="friendly" />
           <Picker.Item label="Sassy" value="sassy" />
@@ -174,7 +173,7 @@ const HomeScreen = () => {
       </TouchableOpacity>
     </LinearGradient>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -234,9 +233,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-
-export default HomeScreen;
-
 
 
 

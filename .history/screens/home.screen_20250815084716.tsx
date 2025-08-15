@@ -15,18 +15,19 @@ import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { LinearGradient } from "expo-linear-gradient";
+import * as FileSystem from "expo-file-system";
 
 const API_BASE = "https://hello-allie-backend.onrender.com/api";
 
 const HomeScreen = () => {
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [recording, setRecording] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [response, setResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [selectedPersonality, setSelectedPersonality] = useState("friendly");
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const soundRef = useRef(null);
 
   useEffect(() => {
     return () => {
@@ -48,10 +49,10 @@ const HomeScreen = () => {
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
-      const { recording: newRecording } = await Audio.Recording.createAsync(
+      const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
-      setRecording(newRecording);
+      setRecording(recording);
     } catch (err) {
       console.error("Failed to start recording", err);
     }
@@ -71,7 +72,7 @@ const HomeScreen = () => {
         uri,
         type: "audio/m4a",
         name: "recording.m4a",
-      } as any);
+      });
       formData.append("language", selectedLanguage);
 
       const transcriptionRes = await fetch(`${API_BASE}/transcribe`, {
@@ -91,7 +92,7 @@ const HomeScreen = () => {
     }
   };
 
-  const handleAIResponse = async (prompt: string) => {
+  const handleAIResponse = async (prompt) => {
     try {
       const res = await fetch(`${API_BASE}/smart`, {
         method: "POST",
@@ -113,7 +114,7 @@ const HomeScreen = () => {
     }
   };
 
-  const speak = (text: string, lang: string) => {
+  const speak = (text, lang) => {
     Speech.stop();
     const voiceLang = lang === "es" ? "es-MX" : "en-US";
     const voiceName = lang === "es" ? undefined : "com.apple.ttsbundle.Samantha-compact";
