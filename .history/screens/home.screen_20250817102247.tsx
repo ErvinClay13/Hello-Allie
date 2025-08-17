@@ -237,482 +237,482 @@
 
 
 
-8/13/2025
-import {
-  Alert,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ScrollView,
-  ActivityIndicator,
-} from "react-native";
-import React, { useState, useCallback, useEffect, useRef } from "react";
-import { LinearGradient } from "expo-linear-gradient";
-import { scale, verticalScale } from "react-native-size-matters";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Audio } from "expo-av";
-import LottieView from "lottie-react-native";
-import * as Speech from "expo-speech";
-import { useFocusEffect } from "@react-navigation/native";
-import { MotiView } from "moti";
+//8/13/2025
+// import {
+//   Alert,
+//   StatusBar,
+//   StyleSheet,
+//   Text,
+//   TouchableOpacity,
+//   View,
+//   ScrollView,
+//   ActivityIndicator,
+// } from "react-native";
+// import React, { useState, useCallback, useEffect, useRef } from "react";
+// import { LinearGradient } from "expo-linear-gradient";
+// import { scale, verticalScale } from "react-native-size-matters";
+// import FontAwesome from "@expo/vector-icons/FontAwesome";
+// import { Audio } from "expo-av";
+// import LottieView from "lottie-react-native";
+// import * as Speech from "expo-speech";
+// import { useFocusEffect } from "@react-navigation/native";
+// import { MotiView } from "moti";
 
  
 
-type Message = {
-  role: string;
-  content: string;
-  timestamp: number;
-};
+// type Message = {
+//   role: string;
+//   content: string;
+//   timestamp: number;
+// };
 
-type ModeKey = "friendly" | "sassy" | "motivational" | "humorous";
+// type ModeKey = "friendly" | "sassy" | "motivational" | "humorous";
 
-type RecordingInstance = InstanceType<typeof Audio.Recording>;
+// type RecordingInstance = InstanceType<typeof Audio.Recording>;
 
-export default function HomeScreen() {
-  const [text, setText] = useState("");
-  const [response, setResponse] = useState("");
-  const [isRecording, setIsRecording] = useState(false);
-  const [recording, setRecording] = useState<RecordingInstance | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [conversationHistory, setConversationHistory] = useState<Message[]>([]);
-  const [selectedPersonality, setSelectedPersonality] =
-    useState<ModeKey>("friendly");
-  const [modeIntro, setModeIntro] = useState("");
-  const [typingIndex, setTypingIndex] = useState(0);
-  const isInitialMount = useRef(true);
-  const [pendingDeleteOptions, setPendingDeleteOptions] = useState<any[]>([]);
+// export default function HomeScreen() {
+//   const [text, setText] = useState("");
+//   const [response, setResponse] = useState("");
+//   const [isRecording, setIsRecording] = useState(false);
+//   const [recording, setRecording] = useState<RecordingInstance | null>(null);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [isSpeaking, setIsSpeaking] = useState(false);
+//   const [conversationHistory, setConversationHistory] = useState<Message[]>([]);
+//   const [selectedPersonality, setSelectedPersonality] =
+//     useState<ModeKey>("friendly");
+//   const [modeIntro, setModeIntro] = useState("");
+//   const [typingIndex, setTypingIndex] = useState(0);
+//   const isInitialMount = useRef(true);
+//   const [pendingDeleteOptions, setPendingDeleteOptions] = useState<any[]>([]);
 
-  const modeQuotes: Record<ModeKey, string> = {
-    friendly: "Hey there! Let’s make this a great chat!",
-    sassy: "Oh honey, buckle up. You picked the best version of me.",
-    motivational: "Let’s get to work. You’ve got greatness to unlock.",
-    humorous: "Why did the AI cross the road? To answer your questions, duh!",
-  };
+//   const modeQuotes: Record<ModeKey, string> = {
+//     friendly: "Hey there! Let’s make this a great chat!",
+//     sassy: "Oh honey, buckle up. You picked the best version of me.",
+//     motivational: "Let’s get to work. You’ve got greatness to unlock.",
+//     humorous: "Why did the AI cross the road? To answer your questions, duh!",
+//   };
 
-  useEffect(() => {
-    if (modeIntro === "") return;
-    setTypingIndex(0);
-    const interval = setInterval(() => {
-      setTypingIndex((prev) => {
-        if (prev >= modeIntro.length) {
-          clearInterval(interval);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, 30);
-    return () => clearInterval(interval);
-  }, [modeIntro]);
+//   useEffect(() => {
+//     if (modeIntro === "") return;
+//     setTypingIndex(0);
+//     const interval = setInterval(() => {
+//       setTypingIndex((prev) => {
+//         if (prev >= modeIntro.length) {
+//           clearInterval(interval);
+//           return prev;
+//         }
+//         return prev + 1;
+//       });
+//     }, 30);
+//     return () => clearInterval(interval);
+//   }, [modeIntro]);
 
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        Speech.stop();
-        setIsLoading(false);
-        setIsSpeaking(false);
-        if (recording) {
-          recording
-            .stopAndUnloadAsync()
-            .catch((e) => console.log("Error stopping recording:", e));
-          setRecording(null);
-          setIsRecording(false);
-        }
-      };
-    }, [recording])
-  );
+//   useFocusEffect(
+//     useCallback(() => {
+//       return () => {
+//         Speech.stop();
+//         setIsLoading(false);
+//         setIsSpeaking(false);
+//         if (recording) {
+//           recording
+//             .stopAndUnloadAsync()
+//             .catch((e) => console.log("Error stopping recording:", e));
+//           setRecording(null);
+//           setIsRecording(false);
+//         }
+//       };
+//     }, [recording])
+//   );
 
-  const getMicrophonePermission = async (): Promise<boolean> => {
-    try {
-      const { granted } = await Audio.requestPermissionsAsync();
-      if (!granted) {
-        Alert.alert(
-          "Permission",
-          "Please grant permission to access microphone"
-        );
-        return false;
-      }
-      return true;
-    } catch (error) {
-      console.log("Microphone Permission Error:", error);
-      return false;
-    }
-  };
+//   const getMicrophonePermission = async (): Promise<boolean> => {
+//     try {
+//       const { granted } = await Audio.requestPermissionsAsync();
+//       if (!granted) {
+//         Alert.alert(
+//           "Permission",
+//           "Please grant permission to access microphone"
+//         );
+//         return false;
+//       }
+//       return true;
+//     } catch (error) {
+//       console.log("Microphone Permission Error:", error);
+//       return false;
+//     }
+//   };
 
-  const recordingOptions: Audio.RecordingOptions = {
-    android: {
-      extension: ".m4a",
-      outputFormat: Audio.AndroidOutputFormat.MPEG_4,
-      audioEncoder: Audio.AndroidAudioEncoder.AAC,
-      sampleRate: 44100,
-      numberOfChannels: 1,
-      bitRate: 128000,
-    },
-    ios: {
-      extension: ".m4a",
-      audioQuality: Audio.IOSAudioQuality.HIGH,
-      sampleRate: 44100,
-      numberOfChannels: 1,
-      bitRate: 128000,
-      linearPCMBitDepth: 16,
-      linearPCMIsBigEndian: false,
-      linearPCMIsFloat: false,
-    },
-    web: {} as any,
-  };
+//   const recordingOptions: Audio.RecordingOptions = {
+//     android: {
+//       extension: ".m4a",
+//       outputFormat: Audio.AndroidOutputFormat.MPEG_4,
+//       audioEncoder: Audio.AndroidAudioEncoder.AAC,
+//       sampleRate: 44100,
+//       numberOfChannels: 1,
+//       bitRate: 128000,
+//     },
+//     ios: {
+//       extension: ".m4a",
+//       audioQuality: Audio.IOSAudioQuality.HIGH,
+//       sampleRate: 44100,
+//       numberOfChannels: 1,
+//       bitRate: 128000,
+//       linearPCMBitDepth: 16,
+//       linearPCMIsBigEndian: false,
+//       linearPCMIsFloat: false,
+//     },
+//     web: {} as any,
+//   };
 
-  const startRecording = async () => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
+//   const startRecording = async () => {
+//     if (isInitialMount.current) {
+//       isInitialMount.current = false;
+//       return;
+//     }
 
-    const hasPermission = await getMicrophonePermission();
-    if (!hasPermission) return;
+//     const hasPermission = await getMicrophonePermission();
+//     if (!hasPermission) return;
 
-    try {
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-      setIsRecording(true);
-      const { recording } = await Audio.Recording.createAsync(recordingOptions);
-      setRecording(recording);
-    } catch (error) {
-      console.log("Failed to start recording:", error);
-      Alert.alert("Error", "Failed to start recording");
-    }
-  };
+//     try {
+//       await Audio.setAudioModeAsync({
+//         allowsRecordingIOS: true,
+//         playsInSilentModeIOS: true,
+//       });
+//       setIsRecording(true);
+//       const { recording } = await Audio.Recording.createAsync(recordingOptions);
+//       setRecording(recording);
+//     } catch (error) {
+//       console.log("Failed to start recording:", error);
+//       Alert.alert("Error", "Failed to start recording");
+//     }
+//   };
 
-  const stopRecording = async () => {
-    try {
-      if (!recording) return;
+//   const stopRecording = async () => {
+//     try {
+//       if (!recording) return;
 
-      setIsRecording(false);
-      await recording.stopAndUnloadAsync();
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+//       setIsRecording(false);
+//       await recording.stopAndUnloadAsync();
+//       await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
 
-      const uri = recording.getURI();
-      if (!uri) return;
+//       const uri = recording.getURI();
+//       if (!uri) return;
 
-      setIsLoading(true);
-      const transcript = await sendAudioToWhisper(uri);
-      if (transcript) {
-        setText(transcript);
+//       setIsLoading(true);
+//       const transcript = await sendAudioToWhisper(uri);
+//       if (transcript) {
+//         setText(transcript);
 
-        // === ✅ Updated delete confirmation block ===
-        if (pendingDeleteOptions.length && /^\d+$/.test(transcript.trim())) {
-          const selectedIndex = parseInt(transcript.trim(), 10) - 1;
-          console.log("Selected delete index:", selectedIndex); // Debug
+//         // === ✅ Updated delete confirmation block ===
+//         if (pendingDeleteOptions.length && /^\d+$/.test(transcript.trim())) {
+//           const selectedIndex = parseInt(transcript.trim(), 10) - 1;
+//           console.log("Selected delete index:", selectedIndex); // Debug
 
-          if (
-            selectedIndex >= 0 &&
-            selectedIndex < pendingDeleteOptions.length
-          ) {
-            const selectedEvent = pendingDeleteOptions[selectedIndex];
-            console.log(
-              "Deleting event at index",
-              selectedIndex,
-              "with ID:",
-              selectedEvent.id
-            );
+//           if (
+//             selectedIndex >= 0 &&
+//             selectedIndex < pendingDeleteOptions.length
+//           ) {
+//             const selectedEvent = pendingDeleteOptions[selectedIndex];
+//             console.log(
+//               "Deleting event at index",
+//               selectedIndex,
+//               "with ID:",
+//               selectedEvent.id
+//             );
 
-            if (!selectedEvent.id) {
-              handleAIResponse({
-                message:
-                  "Unable to find the selected event ID. Please try again.",
-              });
-              return;
-            }
+//             if (!selectedEvent.id) {
+//               handleAIResponse({
+//                 message:
+//                   "Unable to find the selected event ID. Please try again.",
+//               });
+//               return;
+//             }
 
-            const deletionResponse = await deleteScheduleEvent(
-              selectedEvent.id
-            );
-            setPendingDeleteOptions([]);
-            handleAIResponse({ message: deletionResponse });
-            return;
-          } else {
-            handleAIResponse({
-              message: "Invalid selection. Please try again.",
-            });
-            return;
-          }
-        }
+//             const deletionResponse = await deleteScheduleEvent(
+//               selectedEvent.id
+//             );
+//             setPendingDeleteOptions([]);
+//             handleAIResponse({ message: deletionResponse });
+//             return;
+//           } else {
+//             handleAIResponse({
+//               message: "Invalid selection. Please try again.",
+//             });
+//             return;
+//           }
+//         }
 
-        const isScheduleCommand =
-          /remind me|schedule|add to calendar|what's my schedule|show schedule|list schedule|delete|remove/i.test(
-            transcript
-          );
-        let aiResponse;
-        if (isScheduleCommand) {
-          aiResponse = await sendSchedulePrompt(transcript);
-        } else {
-          aiResponse = await getSmartAIResponse(transcript);
-        }
+//         const isScheduleCommand =
+//           /remind me|schedule|add to calendar|what's my schedule|show schedule|list schedule|delete|remove/i.test(
+//             transcript
+//           );
+//         let aiResponse;
+//         if (isScheduleCommand) {
+//           aiResponse = await sendSchedulePrompt(transcript);
+//         } else {
+//           aiResponse = await getSmartAIResponse(transcript);
+//         }
 
-        handleAIResponse(aiResponse);
-      } else {
-        setIsLoading(false);
-      }
-    } catch (error) {
-      console.log("Failed to stop recording:", error);
-      Alert.alert("Error", "Failed to stop recording");
-      setIsLoading(false);
-    }
-  };
+//         handleAIResponse(aiResponse);
+//       } else {
+//         setIsLoading(false);
+//       }
+//     } catch (error) {
+//       console.log("Failed to stop recording:", error);
+//       Alert.alert("Error", "Failed to stop recording");
+//       setIsLoading(false);
+//     }
+//   };
 
-  const handleAIResponse = (aiResponse: any) => {
-    setResponse(aiResponse.message || aiResponse);
+//   const handleAIResponse = (aiResponse: any) => {
+//     setResponse(aiResponse.message || aiResponse);
 
-    if (aiResponse.options) setPendingDeleteOptions(aiResponse.options);
-    else setPendingDeleteOptions([]);
+//     if (aiResponse.options) setPendingDeleteOptions(aiResponse.options);
+//     else setPendingDeleteOptions([]);
 
-    setConversationHistory((prev) => [
-      ...prev,
-      { role: "user", content: text, timestamp: Date.now() },
-      {
-        role: "assistant",
-        content: aiResponse.message || aiResponse,
-        timestamp: Date.now(),
-      },
-    ]);
+//     setConversationHistory((prev) => [
+//       ...prev,
+//       { role: "user", content: text, timestamp: Date.now() },
+//       {
+//         role: "assistant",
+//         content: aiResponse.message || aiResponse,
+//         timestamp: Date.now(),
+//       },
+//     ]);
 
-    setIsLoading(false);
-    setIsSpeaking(true);
-    Speech.speak(
-      (aiResponse.message || aiResponse).replace(/[\u{1F600}-\u{1F64F}]/gu, ""),
-      { onDone: speechDoneHandler }
-    );
-  };
+//     setIsLoading(false);
+//     setIsSpeaking(true);
+//     Speech.speak(
+//       (aiResponse.message || aiResponse).replace(/[\u{1F600}-\u{1F64F}]/gu, ""),
+//       { onDone: speechDoneHandler }
+//     );
+//   };
 
-  const sendAudioToWhisper = async (
-    uri: string
-  ): Promise<string | undefined> => {
-    try {
-      const formData = new FormData();
-      formData.append("file", {
-        uri,
-        type: "audio/m4a",
-        name: "recording.m4a",
-      } as any);
+//   const sendAudioToWhisper = async (
+//     uri: string
+//   ): Promise<string | undefined> => {
+//     try {
+//       const formData = new FormData();
+//       formData.append("file", {
+//         uri,
+//         type: "audio/m4a",
+//         name: "recording.m4a",
+//       } as any);
 
-      const response = await fetch(
-        "https://hello-allie-backend.onrender.com/api/transcribe",
-        {
-          method: "POST",
-          headers: { "Content-Type": "multipart/form-data" },
-          body: formData,
-        }
-      );
+//       const response = await fetch(
+//         "https://hello-allie-backend.onrender.com/api/transcribe",
+//         {
+//           method: "POST",
+//           headers: { "Content-Type": "multipart/form-data" },
+//           body: formData,
+//         }
+//       );
 
-      const data = await response.json();
-      return data.text;
-    } catch (error) {
-      console.log("Whisper Transcription Error:", error);
-      Alert.alert("Error", "Failed to transcribe audio");
-    }
-  };
+//       const data = await response.json();
+//       return data.text;
+//     } catch (error) {
+//       console.log("Whisper Transcription Error:", error);
+//       Alert.alert("Error", "Failed to transcribe audio");
+//     }
+//   };
 
-  const getSmartAIResponse = async (prompt: string): Promise<string> => {
-    try {
-      const res = await fetch(
-        "https://hello-allie-backend.onrender.com/api/smart",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt,
-            conversationHistory,
-            mode: selectedPersonality,
-          }),
-        }
-      );
-      const data = await res.json();
-      return data.result || "Sorry, something went wrong.";
-    } catch (error) {
-      console.error("Smart AI Fetch Error:", error);
-      return "Sorry, something went wrong.";
-    }
-  };
+//   const getSmartAIResponse = async (prompt: string): Promise<string> => {
+//     try {
+//       const res = await fetch(
+//         "https://hello-allie-backend.onrender.com/api/smart",
+//         {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           body: JSON.stringify({
+//             prompt,
+//             conversationHistory,
+//             mode: selectedPersonality,
+//           }),
+//         }
+//       );
+//       const data = await res.json();
+//       return data.result || "Sorry, something went wrong.";
+//     } catch (error) {
+//       console.error("Smart AI Fetch Error:", error);
+//       return "Sorry, something went wrong.";
+//     }
+//   };
 
-  const sendSchedulePrompt = async (prompt: string): Promise<any> => {
-    try {
-      const isDeleteCommand = /delete|remove/i.test(prompt);
-      const endpoint = isDeleteCommand
-        ? "https://hello-allie-backend.onrender.com/api/schedule/delete"
-        : "https://hello-allie-backend.onrender.com/api/schedule";
+//   const sendSchedulePrompt = async (prompt: string): Promise<any> => {
+//     try {
+//       const isDeleteCommand = /delete|remove/i.test(prompt);
+//       const endpoint = isDeleteCommand
+//         ? "https://hello-allie-backend.onrender.com/api/schedule/delete"
+//         : "https://hello-allie-backend.onrender.com/api/schedule";
 
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      });
+//       const res = await fetch(endpoint, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ prompt }),
+//       });
 
-      const data = await res.json();
-      return data;
-    } catch (error) {
-      console.error("Smart Scheduling Fetch Error:", error);
-      return "Sorry, scheduling failed.";
-    }
-  };
+//       const data = await res.json();
+//       return data;
+//     } catch (error) {
+//       console.error("Smart Scheduling Fetch Error:", error);
+//       return "Sorry, scheduling failed.";
+//     }
+//   };
 
-  const deleteScheduleEvent = async (eventId: string): Promise<string> => {
-    try {
-      const res = await fetch(
-        "https://hello-allie-backend.onrender.com/api/schedule/delete",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: eventId }),
-        }
-      );
-      const data = await res.json();
-      return data.message || "Deleted.";
-    } catch (error) {
-      console.error("Delete Event Error:", error);
-      return "Failed to delete event.";
-    }
-  };
+//   const deleteScheduleEvent = async (eventId: string): Promise<string> => {
+//     try {
+//       const res = await fetch(
+//         "https://hello-allie-backend.onrender.com/api/schedule/delete",
+//         {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           body: JSON.stringify({ id: eventId }),
+//         }
+//       );
+//       const data = await res.json();
+//       return data.message || "Deleted.";
+//     } catch (error) {
+//       console.error("Delete Event Error:", error);
+//       return "Failed to delete event.";
+//     }
+//   };
 
-  const speechDoneHandler = () => {
-    setIsSpeaking(false);
-    Audio.setAudioModeAsync({
-      allowsRecordingIOS: true,
-      playsInSilentModeIOS: true,
-    }).catch((error) =>
-      console.log("Audio reset error after speaking:", error)
-    );
-  };
+//   const speechDoneHandler = () => {
+//     setIsSpeaking(false);
+//     Audio.setAudioModeAsync({
+//       allowsRecordingIOS: true,
+//       playsInSilentModeIOS: true,
+//     }).catch((error) =>
+//       console.log("Audio reset error after speaking:", error)
+//     );
+//   };
 
-  const cancelSpeaking = async () => {
-    Speech.stop();
-    setIsSpeaking(false);
-    setIsLoading(false);
-    try {
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-      });
-    } catch (error) {
-      console.log("Audio mode reset error on cancel:", error);
-    }
-  };
+//   const cancelSpeaking = async () => {
+//     Speech.stop();
+//     setIsSpeaking(false);
+//     setIsLoading(false);
+//     try {
+//       await Audio.setAudioModeAsync({
+//         allowsRecordingIOS: false,
+//         playsInSilentModeIOS: true,
+//       });
+//     } catch (error) {
+//       console.log("Audio mode reset error on cancel:", error);
+//     }
+//   };
 
-  return (
-    <LinearGradient colors={["#250152", "#000"]} style={styles.container}>
-      <StatusBar barStyle="light-content" />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {modeIntro && (
-          <Text style={styles.modeIntro}>
-            {modeIntro.slice(0, typingIndex)}
-          </Text>
-        )}
-        <View style={{ height: verticalScale(20) }} />
-        {text ? <Text style={styles.transcript}>You: {text}</Text> : null}
-        {response ? (
-          <Text style={styles.response}>Allie: {response}</Text>
-        ) : null}
-      </ScrollView>
+//   return (
+//     <LinearGradient colors={["#250152", "#000"]} style={styles.container}>
+//       <StatusBar barStyle="light-content" />
+//       <ScrollView contentContainerStyle={styles.scrollContainer}>
+//         {modeIntro && (
+//           <Text style={styles.modeIntro}>
+//             {modeIntro.slice(0, typingIndex)}
+//           </Text>
+//         )}
+//         <View style={{ height: verticalScale(20) }} />
+//         {text ? <Text style={styles.transcript}>You: {text}</Text> : null}
+//         {response ? (
+//           <Text style={styles.response}>Allie: {response}</Text>
+//         ) : null}
+//       </ScrollView>
 
-      <View style={styles.modeButtons}>
-        {(Object.keys(modeQuotes) as ModeKey[]).map((mode) => (
-          <MotiView
-            key={mode}
-            from={{ scale: 1 }}
-            animate={{ scale: selectedPersonality === mode ? 1.2 : 1 }}
-            transition={{ type: "spring" }}
-          >
-            <TouchableOpacity
-              onPress={() => {
-                setSelectedPersonality(mode);
-                setModeIntro(modeQuotes[mode]);
-              }}
-              style={[
-                styles.modeButton,
-                selectedPersonality === mode && styles.activeModeButton,
-              ]}
-            >
-              <Text style={styles.modeText}>{mode}</Text>
-            </TouchableOpacity>
-          </MotiView>
-        ))}
-      </View>
+//       <View style={styles.modeButtons}>
+//         {(Object.keys(modeQuotes) as ModeKey[]).map((mode) => (
+//           <MotiView
+//             key={mode}
+//             from={{ scale: 1 }}
+//             animate={{ scale: selectedPersonality === mode ? 1.2 : 1 }}
+//             transition={{ type: "spring" }}
+//           >
+//             <TouchableOpacity
+//               onPress={() => {
+//                 setSelectedPersonality(mode);
+//                 setModeIntro(modeQuotes[mode]);
+//               }}
+//               style={[
+//                 styles.modeButton,
+//                 selectedPersonality === mode && styles.activeModeButton,
+//               ]}
+//             >
+//               <Text style={styles.modeText}>{mode}</Text>
+//             </TouchableOpacity>
+//           </MotiView>
+//         ))}
+//       </View>
 
-      <View style={styles.micContainer}>
-        {!isRecording ? (
-          <TouchableOpacity style={styles.micButton} onPress={startRecording}>
-            <FontAwesome name="microphone" size={scale(50)} color="#2b3356" />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity onPress={stopRecording}>
-            <LottieView
-              source={require("@/assets/animations/animation.json")}
-              autoPlay
-              loop
-              speed={1.3}
-              style={{ width: scale(250), height: scale(250) }}
-            />
-          </TouchableOpacity>
-        )}
+//       <View style={styles.micContainer}>
+//         {!isRecording ? (
+//           <TouchableOpacity style={styles.micButton} onPress={startRecording}>
+//             <FontAwesome name="microphone" size={scale(50)} color="#2b3356" />
+//           </TouchableOpacity>
+//         ) : (
+//           <TouchableOpacity onPress={stopRecording}>
+//             <LottieView
+//               source={require("@/assets/animations/animation.json")}
+//               autoPlay
+//               loop
+//               speed={1.3}
+//               style={{ width: scale(250), height: scale(250) }}
+//             />
+//           </TouchableOpacity>
+//         )}
 
-        {(isLoading || isSpeaking) && (
-          <TouchableOpacity onPress={cancelSpeaking} style={{ marginTop: 10 }}>
-            <Text style={{ color: "#ff6464", fontSize: 16 }}>Cancel</Text>
-          </TouchableOpacity>
-        )}
+//         {(isLoading || isSpeaking) && (
+//           <TouchableOpacity onPress={cancelSpeaking} style={{ marginTop: 10 }}>
+//             <Text style={{ color: "#ff6464", fontSize: 16 }}>Cancel</Text>
+//           </TouchableOpacity>
+//         )}
 
-        {isLoading && (
-          <View style={{ marginTop: 10 }}>
-            <ActivityIndicator size="large" color="#fff" />
-          </View>
-        )}
-      </View>
-    </LinearGradient>
-  );
-}
+//         {isLoading && (
+//           <View style={{ marginTop: 10 }}>
+//             <ActivityIndicator size="large" color="#fff" />
+//           </View>
+//         )}
+//       </View>
+//     </LinearGradient>
+//   );
+// }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: verticalScale(50) },
-  scrollContainer: { paddingHorizontal: scale(20), alignItems: "center" },
-  modeIntro: {
-    color: "#fff",
-    fontSize: scale(16),
-    marginBottom: verticalScale(10),
-    textAlign: "center",
-  },
-  transcript: {
-    color: "#9ddcff",
-    fontSize: scale(14),
-    fontStyle: "italic",
-    marginBottom: verticalScale(5),
-  },
-  response: {
-    color: "#fff",
-    fontSize: scale(16),
-    textAlign: "center",
-    paddingHorizontal: scale(10),
-  },
-  modeButtons: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: verticalScale(20),
-    marginBottom: verticalScale(10),
-  },
-  modeButton: { backgroundColor: "#333", padding: 10, borderRadius: 20 },
-  activeModeButton: { backgroundColor: "#7f5af0" },
-  modeText: { color: "#fff", textTransform: "capitalize" },
-  micContainer: { alignItems: "center", marginTop: verticalScale(10) },
-  micButton: {
-    width: scale(110),
-    height: scale(110),
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: scale(100),
-  },
-});
+// const styles = StyleSheet.create({
+//   container: { flex: 1, paddingTop: verticalScale(50) },
+//   scrollContainer: { paddingHorizontal: scale(20), alignItems: "center" },
+//   modeIntro: {
+//     color: "#fff",
+//     fontSize: scale(16),
+//     marginBottom: verticalScale(10),
+//     textAlign: "center",
+//   },
+//   transcript: {
+//     color: "#9ddcff",
+//     fontSize: scale(14),
+//     fontStyle: "italic",
+//     marginBottom: verticalScale(5),
+//   },
+//   response: {
+//     color: "#fff",
+//     fontSize: scale(16),
+//     textAlign: "center",
+//     paddingHorizontal: scale(10),
+//   },
+//   modeButtons: {
+//     flexDirection: "row",
+//     justifyContent: "space-around",
+//     marginTop: verticalScale(20),
+//     marginBottom: verticalScale(10),
+//   },
+//   modeButton: { backgroundColor: "#333", padding: 10, borderRadius: 20 },
+//   activeModeButton: { backgroundColor: "#7f5af0" },
+//   modeText: { color: "#fff", textTransform: "capitalize" },
+//   micContainer: { alignItems: "center", marginTop: verticalScale(10) },
+//   micButton: {
+//     width: scale(110),
+//     height: scale(110),
+//     backgroundColor: "#fff",
+//     alignItems: "center",
+//     justifyContent: "center",
+//     borderRadius: scale(100),
+//   },
+// });
 
 
 
